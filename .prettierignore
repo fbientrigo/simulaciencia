@@ -4,3 +4,11 @@ pnpm-lock.yaml
 coverage
 playwright-report
 test-results
+dist-demo/
+dist-pages/
+**/dist-*/
+
+# Slidev decks. Prettier reads a per-slide front-matter block as a thematic
+# break followed by prose and inserts a blank line after the `---`, which stops
+# Slidev seeing the block at all — the slide silently loses its layout.
+apps/classroom/*.md

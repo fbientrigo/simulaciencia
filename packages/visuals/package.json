@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@simulaciencia/case-inverse-transform": "workspace:*",
+    "@simulaciencia/case-poisson-counting": "workspace:*",
     "@simulaciencia/case-radioactive-decay": "workspace:*",
     "@simulaciencia/core": "workspace:*",
     "@simulaciencia/schemas": "workspace:*",

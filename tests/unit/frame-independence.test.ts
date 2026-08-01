@@ -1,5 +1,6 @@
 import { SimulationRunner, planSteps } from '@simulaciencia/core';
 import { inverseTransformCase } from '@simulaciencia/case-inverse-transform';
+import { poissonCountingCase } from '@simulaciencia/case-poisson-counting';
 import { radioactiveDecayCase } from '@simulaciencia/case-radioactive-decay';
 import { describe, expect, it } from 'vitest';
 
@@ -78,6 +79,19 @@ describe('frame subdivision independence', () => {
     for (let i = 0; i < 200; i += 1) fine.advanceBy(0.01);
 
     expect(fine.snapshot()).toEqual(coarse.snapshot());
+  });
+
+  it('produces the same poisson-counting snapshot regardless of frame size', () => {
+    const init = { seed: 20260801, params: { rate: 3, windowDuration: 1, maxWindows: 200 } };
+    const coarse = new SimulationRunner(poissonCountingCase, init);
+    coarse.advanceBy(10);
+
+    const fine = new SimulationRunner(poissonCountingCase, init);
+    for (let i = 0; i < 1000; i += 1) fine.advanceBy(0.01);
+
+    expect(fine.snapshot()).toEqual(coarse.snapshot());
+    // 10 s of playback at a 0.25 s step is 40 revealed observation windows.
+    expect(coarse.snapshot().revealedWindows).toBe(40);
   });
 
   it('keeps simulation time exactly stepIndex × fixedDt, never an accumulator', () => {

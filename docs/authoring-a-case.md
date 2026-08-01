@@ -233,10 +233,45 @@ Add the component to `packages/visuals/src/index.ts`, then drop it into
   legitimate core change — add exactly the shape you need, not a general
   validation framework.
 
-This is deliberate. The two existing cases produced exactly four shared
+This is deliberate. The first two cases produced exactly four shared
 abstractions (`RandomSource`, `SimulationCase`, `SimulationRunner`, the
-statistics helpers). Nothing was generalized before a second case demanded it,
-and the third case should not change that.
+statistics helpers). Nothing was generalized before a second case demanded it.
+
+### The third case, as a worked example
+
+`cases/poisson-counting` is the most recent case and the closest thing to a
+reference implementation of this guide. Read it for four things this document
+only describes in the abstract:
+
+- **Precomputation in `createState`, revelation in `step`.** Every observation
+  window is generated up front; one step reveals exactly one of them. That keeps
+  `step` trivially pure and makes "N windows" and "N × `fixedDt`" the same
+  statement, which is what lets a slide restore an exact starting frame from a
+  number.
+- **`fixedDt` is playback time, not physical time.** `POISSON_STEP_SECONDS` is
+  0.25 s of lecture pacing; the physical exposure is a separate snapshot field,
+  `revealedWindows × windowDuration`. If your case has two clocks, expose both
+  and name them differently.
+- **One deterministic fork per concern.** Each window forks
+  `window:<i>:arrivals` and `window:<i>:positions` from the root source.
+  Because `fork` derives a stream from `(seed, label)` rather than from the
+  parent's current position, changing how events are placed on screen provably
+  cannot move a single count — asserted directly in
+  `case-poisson-counting.test.ts`.
+- **No `NaN` in a snapshot.** An undefined estimator reports `0`, and
+  `revealedWindows` — not the value — tells a reader whether the number means
+  anything. `NaN` survives `JSON.stringify` only as `null`, which would break
+  the round-trip guarantee every snapshot makes.
+
+It also shows where NOT to reach for core: the Poisson PMF is implemented in
+`cases/poisson-counting/src/poisson.ts` with a stable recurrence, and stays
+there until a second case wants it.
+
+### Presentation belongs to the presentation layer
+
+If your case is going to be taught in stages, the stages go in
+`packages/visuals`, never in the case. See `TeachingStage` in
+[architecture.md](architecture.md#teachingstage-belongs-to-the-presentation-layer).
 
 ---
 
@@ -248,4 +283,7 @@ and the third case should not change that.
 - [ ] Seed determinism and seed sensitivity are tested
 - [ ] The snapshot round-trips through JSON
 - [ ] The case directory is listed in `engine-purity.test.ts`
+- [ ] The case is aliased in `vitest.config.ts` and excluded in both app
+      `vite.config.ts` files
+- [ ] No `TeachingStage`, no `NaN` in the snapshot, no browser global
 - [ ] `pnpm test` is green

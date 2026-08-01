@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { INVERSE_TRANSFORM_ID, inverseTransformCase } from '@simulaciencia/case-inverse-transform';
+import {
+  POISSON_COUNTING_ID,
+  POISSON_STEP_SECONDS,
+  poissonCountingCase,
+} from '@simulaciencia/case-poisson-counting';
 import { RADIOACTIVE_DECAY_ID, radioactiveDecayCase } from '@simulaciencia/case-radioactive-decay';
 import { decodeConfigFromQuery, encodeConfigToQuery, validateParams } from '@simulaciencia/schemas';
 import {
@@ -9,7 +14,16 @@ import {
   TOKEN_ROLES,
   type DisplayMode,
 } from '@simulaciencia/theme';
-import { BrandMark, DecayChamber3D, InverseTransformExplorer } from '@simulaciencia/visuals';
+import {
+  BrandMark,
+  DecayChamber3D,
+  InverseTransformExplorer,
+  PoissonCountingLab,
+  STAGE_DESCRIPTIONS,
+  STAGE_LABELS,
+  TEACHING_STAGES,
+  type TeachingStage,
+} from '@simulaciencia/visuals';
 import { computed, ref } from 'vue';
 
 /**
@@ -52,11 +66,59 @@ const inverseSeed =
 const decaySeed =
   pinned === RADIOACTIVE_DECAY_ID && decoded.seed !== null ? decoded.seed : 20260801;
 
+const poissonParams = computed(() => {
+  const fallback = { rate: 3, windowDuration: 1, maxWindows: 600 };
+  if (pinned !== POISSON_COUNTING_ID) return fallback;
+  const parsed = validateParams(poissonCountingCase.schema, decoded.rawParams);
+  return parsed.ok ? parsed.value : fallback;
+});
+
+const poissonSeed =
+  pinned === POISSON_COUNTING_ID && decoded.seed !== null ? decoded.seed : 20260801;
+
+/**
+ * The teaching stage is a PRESENTATION choice, so it travels in the URL beside
+ * `mode` and `theme` rather than inside the case parameters — a frozen link has
+ * to reproduce what was on screen, and the stage is part of that.
+ */
+const stage = ref<TeachingStage>(
+  (TEACHING_STAGES as readonly string[]).includes(decoded.rawParams.stage ?? '')
+    ? (decoded.rawParams.stage as TeachingStage)
+    : 'diagnostics',
+);
+
+/**
+ * A frozen `t` for the counting case is read back as a window count, because
+ * exactly one case step reveals exactly one observation window.
+ */
+const poissonWindows = computed(() =>
+  pinned === POISSON_COUNTING_ID && decoded.time !== null
+    ? Math.round(decoded.time / POISSON_STEP_SECONDS)
+    : 400,
+);
+
+/** Force the 2D fallback, so the flat path can be reviewed on a real machine. */
+const poissonFallback = ref(decoded.rawParams.fallback === '1');
+
 const inverseFreeze = pinned === INVERSE_TRANSFORM_ID ? (decoded.time ?? undefined) : undefined;
 const decayFreeze = pinned === RADIOACTIVE_DECAY_ID ? (decoded.time ?? undefined) : undefined;
 
 /** Build the shareable, deterministic link for a case as currently configured. */
 function permalink(caseId: string): string {
+  if (caseId === POISSON_COUNTING_ID) {
+    const query = encodeConfigToQuery({
+      caseId: POISSON_COUNTING_ID,
+      version: poissonCountingCase.version,
+      seed: poissonSeed,
+      params: poissonParams.value,
+      time: poissonWindows.value * POISSON_STEP_SECONDS,
+    });
+    query.set('mode', mode.value);
+    query.set('stage', stage.value);
+    if (poissonFallback.value) query.set('fallback', '1');
+    if (dark.value) query.set('theme', 'dark');
+    return `${globalThis.location.origin}${globalThis.location.pathname}?${query.toString()}`;
+  }
   const query =
     caseId === INVERSE_TRANSFORM_ID
       ? encodeConfigToQuery({
@@ -153,6 +215,52 @@ async function copyPermalink(caseId: string): Promise<void> {
           {{ copied === RADIOACTIVE_DECAY_ID ? 'Copied' : 'Copy permalink' }}
         </button>
         <code>{{ permalink(RADIOACTIVE_DECAY_ID) }}</code>
+      </div>
+    </section>
+
+    <section class="sc-stack">
+      <h2 class="sc-subtitle">3 · {{ poissonCountingCase.title }}</h2>
+      <p class="sc-caption">
+        Esta sección está en español porque forma parte de la Clase 01. La etapa didáctica decide
+        qué se muestra, nunca qué se calcula: con la misma semilla y los mismos parámetros, todas
+        las etapas contienen exactamente la misma simulación.
+      </p>
+
+      <div class="gallery__toolbar">
+        <label class="gallery__field">
+          <span>Etapa didáctica</span>
+          <select v-model="stage" class="sc-button">
+            <option v-for="option in TEACHING_STAGES" :key="option" :value="option">
+              {{ STAGE_LABELS[option] }}
+            </option>
+          </select>
+        </label>
+        <label class="gallery__field">
+          <span>Representación plana</span>
+          <button class="sc-button" type="button" @click="poissonFallback = !poissonFallback">
+            {{ poissonFallback ? 'Volver a 3D' : 'Forzar respaldo 2D' }}
+          </button>
+        </label>
+      </div>
+      <p class="sc-caption">{{ STAGE_DESCRIPTIONS[stage] }}</p>
+
+      <PoissonCountingLab
+        :key="`pc-${mode}-${stage}-${poissonFallback}`"
+        :mode="mode"
+        :stage="stage"
+        :seed="poissonSeed"
+        :rate="poissonParams.rate"
+        :window-duration="poissonParams.windowDuration"
+        :max-windows="poissonParams.maxWindows"
+        :initial-windows="poissonWindows"
+        :force-fallback="poissonFallback"
+        show-parameters
+      />
+      <div class="gallery__permalink">
+        <button class="sc-button" type="button" @click="copyPermalink(POISSON_COUNTING_ID)">
+          {{ copied === POISSON_COUNTING_ID ? 'Enlace copiado' : 'Copiar enlace determinista' }}
+        </button>
+        <code>{{ permalink(POISSON_COUNTING_ID) }}</code>
       </div>
     </section>
 

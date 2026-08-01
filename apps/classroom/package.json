@@ -3,16 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Slidev demonstration lesson: exponential inverse transform and population decay.",
+  "description": "Slidev classroom decks: Clase 01 (Poisson counting, primary) and the inverse-transform demonstration.",
   "scripts": {
     "dev": "slidev slides.md --open",
     "build": "slidev build slides.md --base ./ --out dist",
+    "build:pages": "slidev build slides.md --base /simulaciencia/ --out dist-pages",
+    "dev:demo": "slidev demo-inverse-transform.md --open",
+    "build:demo": "slidev build demo-inverse-transform.md --base ./ --out dist-demo",
     "export": "slidev export slides.md",
     "typecheck": "vue-tsc -p tsconfig.json --noEmit",
     "preview": "vite preview --outDir dist"
   },
   "dependencies": {
     "@simulaciencia/case-inverse-transform": "workspace:*",
+    "@simulaciencia/case-poisson-counting": "workspace:*",
     "@simulaciencia/case-radioactive-decay": "workspace:*",
     "@simulaciencia/core": "workspace:*",
     "@simulaciencia/schemas": "workspace:*",

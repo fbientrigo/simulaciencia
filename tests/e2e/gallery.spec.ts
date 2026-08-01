@@ -104,4 +104,54 @@ test.describe('gallery', () => {
     await explorer.getByRole('button', { name: 'Reset' }).click();
     await expect(explorer).toContainText('0 / 300 drawn');
   });
+  test('mounts the Poisson laboratory and honours the stage in the URL', async ({ page }) => {
+    await page.goto(
+      '/?case=poisson-counting&seed=20260801&rate=3&windowDuration=1&maxWindows=600&t=100&stage=diagnostics',
+    );
+    const lab = page.getByTestId('poisson-counting-lab');
+    await expect(lab).toBeVisible();
+    await expect(lab).toHaveAttribute('data-stage', 'diagnostics');
+    // t = 100 at a 0.25 s step is 400 revealed observation windows.
+    await expect(lab.getByTestId('poisson-revealed-windows')).toHaveText('400');
+    await expect(lab.getByTestId('diagnostic-fano')).toHaveText('1.023');
+    await expect(lab.getByTestId('poisson-pmf-curve')).toBeVisible();
+
+    // Selecting an earlier stage takes features away and never adds any.
+    await page.goto(
+      '/?case=poisson-counting&seed=20260801&rate=3&windowDuration=1&maxWindows=600&t=100&stage=histogram',
+    );
+    const earlier = page.getByTestId('poisson-counting-lab');
+    await expect(earlier).toHaveAttribute('data-stage', 'histogram');
+    await expect(earlier.getByTestId('discrete-count-chart')).toBeVisible();
+    await expect(earlier.getByTestId('poisson-pmf-curve')).toHaveCount(0);
+    await expect(earlier.getByTestId('poisson-diagnostics')).toHaveCount(0);
+  });
+
+  test('the Poisson laboratory can be forced onto the flat fallback', async ({ page }) => {
+    await page.goto(
+      '/?case=poisson-counting&seed=20260801&rate=3&windowDuration=1&maxWindows=600&t=10&stage=counter&fallback=1',
+    );
+    const lab = page.getByTestId('poisson-counting-lab');
+    const fallback = lab.getByTestId('poisson-detector-fallback');
+    await expect(fallback).toBeVisible();
+    await expect(fallback).toContainText('WebGL 2 no está disponible');
+    // The statistics are identical to the WebGL path; only the drawing changed.
+    await expect(lab.getByTestId('poisson-revealed-windows')).toHaveText('40');
+  });
+
+  test('one manual click on the Poisson laboratory adds exactly one observation', async ({
+    page,
+  }) => {
+    await page.goto(
+      '/?case=poisson-counting&seed=20260801&rate=3&windowDuration=1&maxWindows=600&t=1.25&stage=automatic',
+    );
+    const lab = page.getByTestId('poisson-counting-lab');
+    await expect(lab.getByTestId('poisson-revealed-windows')).toHaveText('5');
+
+    await lab.getByTestId('poisson-sample-window').click();
+    await expect(lab.getByTestId('poisson-revealed-windows')).toHaveText('6');
+
+    await lab.getByTestId('poisson-reset').click();
+    await expect(lab.getByTestId('poisson-revealed-windows')).toHaveText('5');
+  });
 });
