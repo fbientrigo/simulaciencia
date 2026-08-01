@@ -4,8 +4,10 @@ import {
   POISSON_COUNTING_ID,
   POISSON_STEP_SECONDS,
   poissonCountingCase,
+  type PoissonCountingParams,
 } from '@simulaciencia/case-poisson-counting';
 import { RADIOACTIVE_DECAY_ID, radioactiveDecayCase } from '@simulaciencia/case-radioactive-decay';
+import { planSteps } from '@simulaciencia/core';
 import { decodeConfigFromQuery, encodeConfigToQuery, validateParams } from '@simulaciencia/schemas';
 import {
   BRAND,
@@ -89,13 +91,30 @@ const stage = ref<TeachingStage>(
 
 /**
  * A frozen `t` for the counting case is read back as a window count, because
- * exactly one case step reveals exactly one observation window.
+ * exactly one case step reveals exactly one observation window. Partial steps
+ * stay unrevealed, matching SimulationRunner.advanceToTime().
  */
 const poissonWindows = computed(() =>
   pinned === POISSON_COUNTING_ID && decoded.time !== null
-    ? Math.round(decoded.time / POISSON_STEP_SECONDS)
+    ? planSteps(decoded.time, POISSON_STEP_SECONDS).steps
     : 400,
 );
+
+interface PoissonPermalinkState {
+  readonly seed: number;
+  readonly params: PoissonCountingParams;
+  readonly revealedWindows: number;
+}
+
+const poissonState = ref<PoissonPermalinkState>({
+  seed: poissonSeed,
+  params: { ...poissonParams.value },
+  revealedWindows: poissonWindows.value,
+});
+
+function updatePoissonState(state: PoissonPermalinkState): void {
+  poissonState.value = state;
+}
 
 /** Force the 2D fallback, so the flat path can be reviewed on a real machine. */
 const poissonFallback = ref(decoded.rawParams.fallback === '1');
@@ -109,9 +128,9 @@ function permalink(caseId: string): string {
     const query = encodeConfigToQuery({
       caseId: POISSON_COUNTING_ID,
       version: poissonCountingCase.version,
-      seed: poissonSeed,
-      params: poissonParams.value,
-      time: poissonWindows.value * POISSON_STEP_SECONDS,
+      seed: poissonState.value.seed,
+      params: poissonState.value.params,
+      time: poissonState.value.revealedWindows * POISSON_STEP_SECONDS,
     });
     query.set('mode', mode.value);
     query.set('stage', stage.value);
@@ -255,6 +274,7 @@ async function copyPermalink(caseId: string): Promise<void> {
         :initial-windows="poissonWindows"
         :force-fallback="poissonFallback"
         show-parameters
+        @state-change="updatePoissonState"
       />
       <div class="gallery__permalink">
         <button class="sc-button" type="button" @click="copyPermalink(POISSON_COUNTING_ID)">
