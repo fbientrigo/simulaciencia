@@ -1,0 +1,18 @@
+{
+  "name": "@simulaciencia/case-radioactive-decay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Population decay driven by one exponential lifetime per object, sampled with the same inverse transform.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@simulaciencia/core": "workspace:*",
+    "@simulaciencia/schemas": "workspace:*"
+  }
+}

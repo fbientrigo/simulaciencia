@@ -1,0 +1,30 @@
+{
+  "name": "@simulaciencia/visuals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Vue 3 components that render immutable simulation snapshots. Owns Three.js scene lifecycle explicitly; never owns statistical truth.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./style.css": "./src/style.css"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@simulaciencia/case-inverse-transform": "workspace:*",
+    "@simulaciencia/case-radioactive-decay": "workspace:*",
+    "@simulaciencia/core": "workspace:*",
+    "@simulaciencia/schemas": "workspace:*",
+    "@simulaciencia/theme": "workspace:*",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.185.3",
+    "vue": "3.5.40"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  }
+}

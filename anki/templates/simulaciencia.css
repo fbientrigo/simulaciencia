@@ -1,0 +1,175 @@
+/*
+ * SimulaCiencia — preliminary Anki card styling.
+ *
+ * Anki's card renderer does not support `@import`, so the tokens are inlined
+ * here. They are a COPY of `packages/theme/src/tokens.css`; when a colour
+ * changes there, change it here too. Deck generation is deferred work — this
+ * file exists so cards look like the lessons from the first card onward.
+ *
+ * Anki toggles `.nightMode` on the body instead of honouring
+ * `prefers-color-scheme`, so the dark surface is bound to that class.
+ */
+
+.card {
+  --sc-ink: #0b1020;
+  --sc-paper: #f7f9fc;
+
+  --sc-theoretical: #4f7cff;
+  --sc-simulated: #f59e0b;
+  --sc-success: #14b8a6;
+  --sc-error: #f43f5e;
+  --sc-uncertainty: #8b5cf6;
+
+  --sc-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sc-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --sc-surface: var(--sc-paper);
+  --sc-surface-raised: #ffffff;
+  --sc-surface-sunken: #eef2f8;
+  --sc-border: #d3dbe8;
+  --sc-text: var(--sc-ink);
+  --sc-text-muted: #4b5567;
+
+  --sc-theoretical-text: #2f4fc7;
+  --sc-theoretical-soft: #e8eeff;
+  --sc-simulated-text: #92400e;
+  --sc-simulated-soft: #fef3e2;
+  --sc-success-text: #0d6e66;
+  --sc-success-soft: #e2f7f4;
+  --sc-error-text: #be123c;
+  --sc-uncertainty-text: #6d28d9;
+  --sc-uncertainty-soft: #f1eafe;
+
+  font-family: var(--sc-font-sans);
+  font-size: 19px;
+  line-height: 1.55;
+  text-align: left;
+  color: var(--sc-text);
+  background: var(--sc-surface);
+  padding: 1.25rem;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.card.nightMode,
+.nightMode .card {
+  --sc-surface: #0f1524;
+  --sc-surface-raised: #141b2e;
+  --sc-surface-sunken: #0a0f1c;
+  --sc-border: #2a3448;
+  --sc-text: #eef2f8;
+  --sc-text-muted: #9aa5bc;
+
+  --sc-theoretical-text: #8faaff;
+  --sc-theoretical-soft: #1b2440;
+  --sc-simulated-text: #fbbf24;
+  --sc-simulated-soft: #2c2213;
+  --sc-success-text: #2dd4bf;
+  --sc-success-soft: #102b2b;
+  --sc-error-text: #fb7185;
+  --sc-uncertainty-text: #a78bfa;
+  --sc-uncertainty-soft: #221a3a;
+}
+
+/* ---- Card structure ------------------------------------------------------ */
+
+.sc-card__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.sc-card__brand svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.sc-card__question {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.sc-card__answer {
+  margin-top: 0.5rem;
+}
+
+hr#answer {
+  border: none;
+  border-top: 1px solid var(--sc-border);
+  margin: 1rem 0;
+}
+
+/* ---- Shared panel vocabulary --------------------------------------------- */
+
+.sc-panel {
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--sc-border);
+  border-radius: 4px;
+  background: var(--sc-surface-sunken);
+  margin: 0.75rem 0;
+}
+
+.sc-panel--equation {
+  border-color: var(--sc-theoretical);
+  background: var(--sc-theoretical-soft);
+  text-align: center;
+}
+
+.sc-panel--warning {
+  border-color: var(--sc-simulated);
+  background: var(--sc-simulated-soft);
+}
+
+.sc-panel--result {
+  border-color: var(--sc-success);
+  background: var(--sc-success-soft);
+}
+
+.sc-panel--exercise {
+  border-color: var(--sc-uncertainty);
+  background: var(--sc-uncertainty-soft);
+}
+
+/* ---- Semantic emphasis --------------------------------------------------- */
+
+.sc-theoretical {
+  color: var(--sc-theoretical-text);
+  font-weight: 600;
+}
+
+.sc-simulated {
+  color: var(--sc-simulated-text);
+  font-weight: 600;
+}
+
+.sc-uncertainty {
+  color: var(--sc-uncertainty-text);
+  font-weight: 600;
+}
+
+.sc-numeric,
+code,
+.sc-card code {
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+  background: var(--sc-surface-sunken);
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+}
+
+.sc-hint {
+  font-size: 0.8rem;
+  color: var(--sc-text-muted);
+}
+
+/* MathJax is Anki's built-in maths renderer; keep it from overflowing. */
+.card mjx-container {
+  overflow-x: auto;
+  max-width: 100%;
+}

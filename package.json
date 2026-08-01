@@ -1,0 +1,51 @@
+{
+  "name": "simulaciencia",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A reusable simulation engine and interactive web laboratory for teaching statistical simulation through reproducible experiments, 2D/3D visualizations, and HTML-based lessons.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @simulaciencia/gallery dev",
+    "dev:gallery": "pnpm --filter @simulaciencia/gallery dev",
+    "slides": "pnpm --filter @simulaciencia/classroom dev",
+    "build": "pnpm build:gallery && pnpm build:slides",
+    "build:gallery": "pnpm --filter @simulaciencia/gallery build",
+    "build:slides": "pnpm --filter @simulaciencia/classroom build",
+    "typecheck": "pnpm -r --stream typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify:all": "pnpm verify && pnpm test:e2e"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "22.20.0",
+    "@types/three": "0.185.3",
+    "@vitejs/plugin-vue": "6.0.8",
+    "@vue/test-utils": "2.4.11",
+    "eslint": "10.8.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-vue": "10.10.0",
+    "jsdom": "30.0.1",
+    "prettier": "3.9.6",
+    "three": "0.185.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.65.0",
+    "vite": "8.2.0",
+    "vitest": "4.1.10",
+    "vue": "3.5.40",
+    "vue-eslint-parser": "10.4.1",
+    "vue-tsc": "3.3.9"
+  }
+}

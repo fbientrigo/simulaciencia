@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.output/
+coverage/
+*.tsbuildinfo
+.DS_Store
+.vite/
+.slidev/
+test-results/
+playwright-report/
+blob-report/
+.eslintcache

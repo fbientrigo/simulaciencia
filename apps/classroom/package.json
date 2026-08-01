@@ -1,0 +1,29 @@
+{
+  "name": "@simulaciencia/classroom",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Slidev demonstration lesson: exponential inverse transform and population decay.",
+  "scripts": {
+    "dev": "slidev slides.md --open",
+    "build": "slidev build slides.md --base ./ --out dist",
+    "export": "slidev export slides.md",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit",
+    "preview": "vite preview --outDir dist"
+  },
+  "dependencies": {
+    "@simulaciencia/case-inverse-transform": "workspace:*",
+    "@simulaciencia/case-radioactive-decay": "workspace:*",
+    "@simulaciencia/core": "workspace:*",
+    "@simulaciencia/schemas": "workspace:*",
+    "@simulaciencia/theme": "workspace:*",
+    "@simulaciencia/visuals": "workspace:*",
+    "@slidev/cli": "52.18.1",
+    "@slidev/theme-default": "0.25.0",
+    "vue": "3.5.40"
+  },
+  "devDependencies": {
+    "vite": "8.2.0",
+    "vue-tsc": "3.3.9"
+  }
+}

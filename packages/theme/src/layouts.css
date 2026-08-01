@@ -1,0 +1,271 @@
+/*
+ * Slide layouts and display modes.
+ *
+ * The same interactive component has to work in four places. Rather than four
+ * components, there is one component inside `.sc-frame`, whose mode sets the
+ * aspect ratio and the internal arrangement:
+ *
+ *   slide    — fills the slide area of a 16:9 deck, controls beside the plot
+ *   embed    — flows in a normal web page, height driven by content
+ *   social-h — a fixed 16:9 capture box for landscape video
+ *   social-v — a fixed 9:16 capture box for vertical video, stacked, larger type
+ *
+ * Container queries, not viewport media queries: an embed on a wide page and a
+ * slide on a small projector must both lay out by their OWN width.
+ */
+
+.sc-frame {
+  container-type: inline-size;
+  container-name: sc-frame;
+
+  display: grid;
+  gap: var(--sc-space-4);
+  padding: var(--sc-space-4);
+  background: var(--sc-surface);
+  color: var(--sc-text);
+  border-radius: var(--sc-radius-md);
+  min-width: 0;
+}
+
+/*
+ * A deck slide is a hard 16:9 box with a title already above it, so the slide
+ * mode is deliberately tighter than the embed: smaller gaps, no duplicated
+ * caption, and paired media instead of stacked media. Without this a component
+ * that reads perfectly in a page silently runs off the bottom of a slide.
+ */
+.sc-frame--slide {
+  height: 100%;
+  /* Header takes what it needs; the body gets the rest and no more, so nothing
+   * can escape past the bottom edge of the slide. */
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--sc-space-3);
+  padding: var(--sc-space-2) 0;
+  overflow: hidden;
+}
+
+.sc-frame--slide > .sc-split--plot-controls {
+  min-height: 0;
+}
+
+/* Last-resort safety valve: a control column that still does not fit scrolls
+ * rather than silently truncating. */
+.sc-frame--slide > .sc-split--plot-controls > * {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* The slide's own heading already says what this is. */
+.sc-frame--slide > .sc-header .sc-caption {
+  display: none;
+}
+
+.sc-frame--slide .sc-title {
+  font-size: var(--sc-text-xl);
+}
+
+/*
+ * Per-control help text is the single largest consumer of vertical space in the
+ * control column, and on a slide the lecturer is saying it out loud anyway.
+ * The live numeric readout in the header keeps its `.sc-numeric` class and
+ * therefore stays.
+ */
+.sc-frame--slide .sc-hint:not(.sc-numeric) {
+  display: none;
+}
+
+.sc-frame--slide .sc-stack,
+.sc-frame--slide .sc-split {
+  gap: var(--sc-space-2);
+}
+
+.sc-frame--slide .sc-metric__value {
+  font-size: var(--sc-text-base);
+}
+
+.sc-frame--slide .sc-stats th,
+.sc-frame--slide .sc-stats td {
+  padding-block: 2px;
+}
+
+/*
+ * On a slide a control collapses from two rows to one: label and value on the
+ * left, slider and number field filling the rest. Roughly halves the height of
+ * the control column, which is what makes a full laboratory fit in 16:9.
+ */
+.sc-frame--slide .sc-control {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-space-2);
+}
+
+/* The label is the only thing naming the parameter once the duplicated value
+ * readout is hidden, so the slider gives way to it first. The label may still
+ * shrink rather than push the number field off the edge of the slide. */
+.sc-frame--slide .sc-control__header {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.sc-frame--slide .sc-control__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The number field beside the slider already shows the value; repeating it in
+ * the header only steals width from the control column. */
+.sc-frame--slide .sc-control__value {
+  display: none;
+}
+
+.sc-frame--slide .sc-control__row {
+  flex: 1 1 6rem;
+  min-width: 0;
+}
+
+.sc-frame--slide .sc-control input[type='range'] {
+  min-width: 2.5rem;
+}
+
+.sc-frame--slide .sc-control input[type='number'] {
+  width: 7ch;
+}
+
+.sc-frame--slide .sc-control--seed input[type='number'] {
+  max-width: 12ch;
+}
+
+/* Controls whose body is a button group, not a slider row, keep both rows. */
+.sc-frame--slide .sc-control--stacked {
+  display: grid;
+}
+
+.sc-frame--embed {
+  border: var(--sc-stroke-thin) solid var(--sc-border);
+  box-shadow: var(--sc-shadow);
+}
+
+.sc-frame--social-h {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--sc-space-5);
+  overflow: hidden;
+}
+
+.sc-frame--social-v {
+  aspect-ratio: 9 / 16;
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
+  padding: var(--sc-space-4);
+  overflow: hidden;
+  font-size: 1.05rem;
+}
+
+/* Vertical capture: everything stacks, controls sink to the bottom. */
+.sc-frame--social-v .sc-split {
+  grid-template-columns: 1fr;
+}
+
+.sc-frame--social-v .sc-title {
+  font-size: var(--sc-text-xl);
+}
+
+/* Captures are recordings, not tools: hide anything that invites clicking. */
+.sc-frame--social-h .sc-capture-hide,
+.sc-frame--social-v .sc-capture-hide {
+  display: none;
+}
+
+/* ---- Internal arrangement ------------------------------------------------ */
+
+.sc-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sc-space-4);
+  min-width: 0;
+}
+
+@container sc-frame (min-width: 720px) {
+  .sc-split--plot-controls {
+    grid-template-columns: minmax(0, 2.2fr) minmax(14rem, 1fr);
+  }
+
+  .sc-split--even {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /*
+   * A 3D view and its companion 2D plot stack in a page, where vertical space
+   * is free, and sit side by side on a slide or in a landscape capture, where
+   * it is not.
+   */
+  .sc-frame--slide .sc-split--media-pair,
+  .sc-frame--social-h .sc-split--media-pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* Keep the chamber wide and short when it shares a row with the curve. */
+.sc-frame--slide .sc-split--media-pair .sc-canvas-shell,
+.sc-frame--social-h .sc-split--media-pair .sc-canvas-shell {
+  aspect-ratio: 16 / 10;
+}
+
+.sc-stack {
+  display: grid;
+  gap: var(--sc-space-3);
+  align-content: start;
+  min-width: 0;
+}
+
+.sc-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sc-space-3);
+}
+
+.sc-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sc-space-2);
+}
+
+/* ---- Deck layouts -------------------------------------------------------- */
+
+.sc-slide {
+  display: grid;
+  gap: var(--sc-space-4);
+  align-content: start;
+  height: 100%;
+  min-height: 0;
+}
+
+.sc-slide--cover {
+  align-content: center;
+  justify-items: start;
+  gap: var(--sc-space-5);
+}
+
+.sc-slide--two-column {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+}
+
+.sc-slide--focus {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+/* A full-bleed area for an interactive component inside a slide. */
+.sc-slide__stage {
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+}

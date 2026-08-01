@@ -1,0 +1,192 @@
+/*
+ * SimulaCiencia design tokens.
+ *
+ * Every token is semantic: it names a ROLE in the pedagogy, never a colour.
+ * A component asks for "the theoretical model colour", not "blue", so the whole
+ * system can be retuned in one file without touching a single component.
+ *
+ * Contrast policy (measured against WCAG 2.1 relative luminance):
+ *   --sc-<role>          mark fill   — plot bars, particles, glyphs
+ *   --sc-<role>-strong   stroke      — outlines and emphasis, ≥ 3:1 on surface
+ *   --sc-<role>-text     text        — ≥ 4.5:1 on the surface of its theme
+ *   --sc-<role>-soft     tint        — panel backgrounds, body text stays ink
+ *
+ * The raw brand hues were kept exactly as specified. They are excellent marks
+ * but several of them (notably "simulated" at 2.04:1 on paper) are illegible as
+ * text, so each role also carries a darkened light-theme and lightened
+ * dark-theme text variant. Measured ratios are noted inline.
+ */
+
+:root {
+  /* ---- Neutral surfaces -------------------------------------------------- */
+  --sc-ink: #0b1020; /* deepest neutral; body text on light surfaces */
+  --sc-paper: #f7f9fc; /* default light page surface (17.95:1 against ink) */
+
+  /* ---- Semantic roles: raw brand hues ------------------------------------ */
+  --sc-theoretical: #4f7cff; /* the closed-form model, the "truth" curve */
+  --sc-simulated: #f59e0b; /* anything produced by sampling */
+  --sc-success: #14b8a6; /* accepted, converged, validated */
+  --sc-error: #f43f5e; /* rejected, diverged, failed check */
+  --sc-uncertainty: #8b5cf6; /* error bars, confidence bands, Monte Carlo noise */
+
+  /* ---- Typography -------------------------------------------------------- */
+  /* No font files are bundled. This stack resolves to the platform UI face. */
+  --sc-font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  --sc-font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  /* Numerals in tables and on axes must line up column-wise. */
+  --sc-font-numeric: var(--sc-font-mono);
+
+  --sc-text-xs: 0.75rem;
+  --sc-text-sm: 0.875rem;
+  --sc-text-base: 1rem;
+  --sc-text-lg: 1.25rem;
+  --sc-text-xl: 1.625rem;
+  --sc-text-2xl: 2.25rem;
+  --sc-text-3xl: 3rem;
+  --sc-leading-tight: 1.2;
+  --sc-leading-normal: 1.55;
+
+  /* Chart typography — deliberately smaller and tighter than body text. */
+  --sc-chart-label-size: 0.75rem;
+  --sc-chart-tick-size: 0.6875rem;
+  --sc-chart-value-size: 0.8125rem;
+  --sc-chart-label-weight: 600;
+  --sc-chart-tick-weight: 400;
+  --sc-chart-letter-spacing: 0.01em;
+
+  /* ---- Spacing and shape ------------------------------------------------- */
+  --sc-space-1: 0.25rem;
+  --sc-space-2: 0.5rem;
+  --sc-space-3: 0.75rem;
+  --sc-space-4: 1rem;
+  --sc-space-5: 1.5rem;
+  --sc-space-6: 2rem;
+  --sc-space-8: 3rem;
+
+  --sc-radius-sm: 4px;
+  --sc-radius-md: 8px;
+  --sc-radius-lg: 14px;
+
+  --sc-stroke-thin: 1px;
+  --sc-stroke-base: 1.75px;
+  --sc-stroke-thick: 2.5px;
+
+  --sc-duration-fast: 120ms;
+  --sc-duration-base: 220ms;
+  --sc-ease: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* ---- Light theme (default) --------------------------------------------- */
+  color-scheme: light;
+
+  --sc-surface: var(--sc-paper);
+  --sc-surface-raised: #ffffff;
+  --sc-surface-sunken: #eef2f8;
+  --sc-border: #d3dbe8;
+  --sc-border-strong: #b3bfd2;
+  --sc-text: var(--sc-ink);
+  --sc-text-muted: #4b5567; /* 7.13:1 on paper */
+  --sc-shadow: 0 1px 2px rgb(11 16 32 / 6%), 0 8px 24px rgb(11 16 32 / 6%);
+  --sc-grid-line: #dde4ee;
+  --sc-axis-line: #8b97ab;
+
+  --sc-theoretical-strong: #3a5fd9; /* 5.21:1 */
+  --sc-theoretical-text: #2f4fc7; /* 6.50:1 */
+  --sc-theoretical-soft: #e8eeff;
+
+  --sc-simulated-strong: #b45309; /* 4.76:1 — the raw hue is only 2.04:1 */
+  --sc-simulated-text: #92400e; /* 6.72:1 */
+  --sc-simulated-soft: #fef3e2;
+
+  --sc-success-strong: #0f766e; /* 5.19:1 */
+  --sc-success-text: #0d6e66; /* 5.79:1 */
+  --sc-success-soft: #e2f7f4;
+
+  --sc-error-strong: #c81e45; /* 5.34:1 */
+  --sc-error-text: #be123c; /* 5.96:1 */
+  --sc-error-soft: #fee9ee;
+
+  --sc-uncertainty-strong: #6d3be4; /* 5.86:1 */
+  --sc-uncertainty-text: #6d28d9; /* 6.74:1 */
+  --sc-uncertainty-soft: #f1eafe;
+}
+
+/*
+ * Dark surfaces. Applied by the OS preference or by an explicit
+ * `data-sc-theme="dark"` on any ancestor, so a single slide can be dark inside
+ * an otherwise light deck.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-sc-theme='light']) {
+    color-scheme: dark;
+
+    --sc-surface: #0f1524;
+    --sc-surface-raised: #141b2e;
+    --sc-surface-sunken: #0a0f1c;
+    --sc-border: #2a3448;
+    --sc-border-strong: #3d4a63;
+    --sc-text: #eef2f8;
+    --sc-text-muted: #9aa5bc; /* 6.92:1 on #141B2E */
+    --sc-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 35%);
+    --sc-grid-line: #232d40;
+    --sc-axis-line: #64708a;
+
+    --sc-theoretical-strong: #6f90ff;
+    --sc-theoretical-text: #8faaff; /* 7.64:1 */
+    --sc-theoretical-soft: #1b2440;
+
+    --sc-simulated-strong: #f9b23c;
+    --sc-simulated-text: #fbbf24; /* 10.26:1 */
+    --sc-simulated-soft: #2c2213;
+
+    --sc-success-strong: #22c9b6;
+    --sc-success-text: #2dd4bf; /* 9.20:1 */
+    --sc-success-soft: #102b2b;
+
+    --sc-error-strong: #f96a83;
+    --sc-error-text: #fb7185; /* 6.36:1 */
+    --sc-error-soft: #2f1520;
+
+    --sc-uncertainty-strong: #9d7cf8;
+    --sc-uncertainty-text: #a78bfa; /* 6.29:1 */
+    --sc-uncertainty-soft: #221a3a;
+  }
+}
+
+/* Explicit opt-in dark, for embeds and social captures that must not follow the OS. */
+[data-sc-theme='dark'] {
+  color-scheme: dark;
+
+  --sc-surface: #0f1524;
+  --sc-surface-raised: #141b2e;
+  --sc-surface-sunken: #0a0f1c;
+  --sc-border: #2a3448;
+  --sc-border-strong: #3d4a63;
+  --sc-text: #eef2f8;
+  --sc-text-muted: #9aa5bc;
+  --sc-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 35%);
+  --sc-grid-line: #232d40;
+  --sc-axis-line: #64708a;
+
+  --sc-theoretical-strong: #6f90ff;
+  --sc-theoretical-text: #8faaff;
+  --sc-theoretical-soft: #1b2440;
+
+  --sc-simulated-strong: #f9b23c;
+  --sc-simulated-text: #fbbf24;
+  --sc-simulated-soft: #2c2213;
+
+  --sc-success-strong: #22c9b6;
+  --sc-success-text: #2dd4bf;
+  --sc-success-soft: #102b2b;
+
+  --sc-error-strong: #f96a83;
+  --sc-error-text: #fb7185;
+  --sc-error-soft: #2f1520;
+
+  --sc-uncertainty-strong: #9d7cf8;
+  --sc-uncertainty-text: #a78bfa;
+  --sc-uncertainty-soft: #221a3a;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@simulaciencia/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure, deterministic simulation engine: seeded randomness, statistics and the SimulationCase contract. No DOM, no Vue, no Three.js.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@simulaciencia/schemas": "workspace:*"
+  }
+}

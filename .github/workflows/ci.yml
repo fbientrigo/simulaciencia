@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Node and pnpm are pinned once here and reused by both jobs. pnpm is read
+# directly from package.json's "packageManager" field by pnpm/action-setup, so
+# bumping that field remains the only place a pnpm upgrade has to happen.
+env:
+  NODE_VERSION: '22.12.0'
+
+jobs:
+  quality:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned pnpm version
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Resolve pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build (gallery + classroom)
+        run: pnpm build
+
+      # The e2e job serves these directly with `vite preview` instead of
+      # rebuilding, so a build only ever happens once per run.
+      - name: Upload gallery production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-dist
+          path: apps/gallery/dist
+          retention-days: 1
+
+      - name: Upload classroom production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: classroom-dist
+          path: apps/classroom/dist
+          retention-days: 1
+
+  e2e:
+    name: Playwright smoke tests
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned pnpm version
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Resolve pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download gallery production build
+        uses: actions/download-artifact@v4
+        with:
+          name: gallery-dist
+          path: apps/gallery/dist
+
+      - name: Download classroom production build
+        uses: actions/download-artifact@v4
+        with:
+          name: classroom-dist
+          path: apps/classroom/dist
+
+      # Deliberately NOT the sandbox's pre-installed Chromium
+      # (SIMULACIENCIA_CHROMIUM / /opt/pw-browsers) — this exercises
+      # Playwright's normal browser resolution, matching a real machine.
+      - name: Install Playwright Chromium and OS dependencies
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright smoke tests against the production builds
+        run: pnpm test:e2e
+
+      - name: Upload Playwright traces and failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
+          retention-days: 5

@@ -1,0 +1,171 @@
+/*
+ * Chart primitives.
+ *
+ * Plots are hand-written SVG, so their styling lives here as classes instead of
+ * inside a charting library's theme object. Colour always encodes the same
+ * thing: blue is the model, amber is the sample, violet is uncertainty.
+ */
+
+.sc-plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--sc-font-sans);
+}
+
+.sc-plot__surface {
+  fill: var(--sc-surface-raised);
+  stroke: var(--sc-border);
+  stroke-width: 1;
+}
+
+.sc-plot__grid {
+  stroke: var(--sc-grid-line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.sc-plot__axis {
+  stroke: var(--sc-axis-line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.sc-plot__tick {
+  font-size: var(--sc-chart-tick-size);
+  font-weight: var(--sc-chart-tick-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--sc-chart-letter-spacing);
+  fill: var(--sc-text-muted);
+}
+
+.sc-plot__axis-label {
+  font-size: var(--sc-chart-label-size);
+  font-weight: var(--sc-chart-label-weight);
+  letter-spacing: var(--sc-chart-letter-spacing);
+  fill: var(--sc-text-muted);
+}
+
+.sc-plot__title {
+  font-size: var(--sc-chart-value-size);
+  font-weight: 650;
+  fill: var(--sc-text);
+}
+
+/* ---- Marks --------------------------------------------------------------- */
+
+.sc-mark-bar {
+  fill: var(--sc-simulated);
+  fill-opacity: 0.75;
+  stroke: var(--sc-simulated-strong);
+  stroke-width: 1;
+}
+
+.sc-mark-curve {
+  fill: none;
+  stroke: var(--sc-theoretical);
+  stroke-width: var(--sc-stroke-thick);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sc-mark-curve--empirical {
+  stroke: var(--sc-simulated-strong);
+  stroke-width: var(--sc-stroke-base);
+}
+
+.sc-mark-curve--reference {
+  stroke: var(--sc-theoretical);
+  stroke-dasharray: 6 4;
+  stroke-width: var(--sc-stroke-base);
+}
+
+.sc-mark-band {
+  fill: var(--sc-uncertainty);
+  fill-opacity: 0.16;
+  stroke: none;
+}
+
+.sc-mark-point {
+  fill: var(--sc-simulated);
+  stroke: var(--sc-simulated-strong);
+  stroke-width: 1;
+}
+
+.sc-mark-point--latest {
+  fill: var(--sc-uncertainty);
+  stroke: var(--sc-uncertainty-strong);
+  stroke-width: var(--sc-stroke-base);
+}
+
+.sc-mark-link {
+  stroke: var(--sc-uncertainty);
+  stroke-width: var(--sc-stroke-thin);
+  stroke-opacity: 0.5;
+  fill: none;
+}
+
+.sc-mark-link--latest {
+  stroke: var(--sc-uncertainty-strong);
+  stroke-width: var(--sc-stroke-base);
+  stroke-opacity: 1;
+}
+
+.sc-mark-rule {
+  stroke: var(--sc-text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.sc-mark-value {
+  font-family: var(--sc-font-numeric);
+  font-size: var(--sc-chart-value-size);
+  font-variant-numeric: tabular-nums;
+  fill: var(--sc-text);
+}
+
+/* ---- 3D chamber surround ------------------------------------------------- */
+
+.sc-canvas-shell {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--sc-radius-md);
+  overflow: hidden;
+  background: var(--sc-surface-sunken);
+  border: var(--sc-stroke-thin) solid var(--sc-border);
+}
+
+.sc-canvas-shell > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sc-canvas-overlay {
+  position: absolute;
+  inset-block-start: var(--sc-space-2);
+  inset-inline-start: var(--sc-space-2);
+  display: flex;
+  gap: var(--sc-space-3);
+  padding: var(--sc-space-1) var(--sc-space-2);
+  border-radius: var(--sc-radius-sm);
+  background: color-mix(in srgb, var(--sc-surface) 82%, transparent);
+  backdrop-filter: blur(3px);
+  font-family: var(--sc-font-numeric);
+  font-size: var(--sc-text-xs);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.sc-fallback {
+  display: grid;
+  gap: var(--sc-space-2);
+  place-content: center;
+  padding: var(--sc-space-4);
+  height: 100%;
+  text-align: center;
+  color: var(--sc-text-muted);
+}
