@@ -1,5 +1,14 @@
 import type { RadioactiveDecaySnapshot } from '@simulaciencia/case-radioactive-decay';
 import * as THREE from 'three';
+import { supportsWebGL2 } from './capabilities.ts';
+import { createDisposalRegistry, type Disposable } from './disposal.ts';
+
+/**
+ * Re-exported so existing importers of `./three/decayScene.ts` keep working
+ * after the capability probe moved out to be shared with the counting
+ * detector. The implementation now lives in `./capabilities.ts`.
+ */
+export { supportsWebGL2 };
 
 /**
  * The Three.js chamber, written as a plain object with an explicit lifecycle.
@@ -74,24 +83,6 @@ const EVENT_HIGHLIGHT_SECONDS = 0.45;
 const defaultRendererFactory: RendererFactory = (canvas) =>
   new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 
-/**
- * Is WebGL 2 usable here?
- *
- * Called before constructing anything, so a machine without WebGL renders the
- * 2D fallback rather than throwing inside a Vue lifecycle hook.
- */
-export function supportsWebGL2(): boolean {
-  if (typeof document === 'undefined') return false;
-  try {
-    const probe = document.createElement('canvas');
-    // Truthiness, not `!== null`: jsdom returns `undefined` for an
-    // unimplemented context type, which a null check would read as success.
-    return Boolean(probe.getContext('webgl2'));
-  } catch {
-    return false;
-  }
-}
-
 export function createDecayScene(options: DecaySceneOptions): DecayScene {
   const { canvas, width, height } = options;
   // Mutable so `setSpinRate` can change it after construction — the idle
@@ -103,11 +94,8 @@ export function createDecayScene(options: DecaySceneOptions): DecayScene {
 
   // One list, one dispose loop. Anything added to the scene that owns GPU
   // memory MUST be pushed here at construction time.
-  const disposables: { dispose(): void }[] = [];
-  const track = <T extends { dispose(): void }>(resource: T): T => {
-    disposables.push(resource);
-    return resource;
-  };
+  const disposables = createDisposalRegistry();
+  const track = <T extends Disposable>(resource: T): T => disposables.track(resource);
 
   const renderer = factory(canvas);
   renderer.setPixelRatio(options.pixelRatio ?? 1);
@@ -229,8 +217,7 @@ export function createDecayScene(options: DecaySceneOptions): DecayScene {
       instances = null;
     }
     scene.remove(chamber);
-    for (const resource of disposables) resource.dispose();
-    disposables.length = 0;
+    disposables.disposeAll();
     scene.clear();
     renderer.dispose();
     highlightUntil = new Float64Array(0);

@@ -1,0 +1,18 @@
+{
+  "name": "@simulaciencia/case-poisson-counting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Counts of events in a fixed observation window, generated from exponential inter-arrival times.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@simulaciencia/core": "workspace:*",
+    "@simulaciencia/schemas": "workspace:*"
+  }
+}

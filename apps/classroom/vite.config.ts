@@ -13,6 +13,7 @@ export default defineConfig({
       '@simulaciencia/theme',
       '@simulaciencia/visuals',
       '@simulaciencia/case-inverse-transform',
+      '@simulaciencia/case-poisson-counting',
       '@simulaciencia/case-radioactive-decay',
     ],
   },

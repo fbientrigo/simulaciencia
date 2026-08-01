@@ -56,6 +56,14 @@ export interface UseSimulation<
   toggle(): void;
   /** Advance exactly one fixed step, paused. This is "step-by-step mode". */
   stepOnce(): void;
+  /**
+   * Pause and fast-forward to a simulation time, publishing the result.
+   *
+   * Never rewinds — a caller that needs an earlier time resets first. This is
+   * how a component restores a deterministic starting frame after `reset`,
+   * which by design lands back at t = 0.
+   */
+  seekTo(targetTime: number): void;
   /** Run to completion instantly. */
   finish(): void;
   reset(next?: { seed?: number; params?: Partial<Record<keyof P, unknown>> }): void;
@@ -148,6 +156,12 @@ export function useSimulation<
     publish();
   }
 
+  function seekTo(targetTime: number): void {
+    pause();
+    runner.advanceToTime(targetTime);
+    publish();
+  }
+
   function finish(): void {
     pause();
     runner.runToCompletion();
@@ -184,6 +198,7 @@ export function useSimulation<
     pause,
     toggle,
     stepOnce,
+    seekTo,
     finish,
     reset,
     resample,

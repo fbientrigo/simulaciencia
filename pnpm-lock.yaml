@@ -71,6 +71,9 @@ importers:
       '@simulaciencia/case-inverse-transform':
         specifier: workspace:*
         version: link:../../cases/inverse-transform
+      '@simulaciencia/case-poisson-counting':
+        specifier: workspace:*
+        version: link:../../cases/poisson-counting
       '@simulaciencia/case-radioactive-decay':
         specifier: workspace:*
         version: link:../../cases/radioactive-decay
@@ -108,6 +111,9 @@ importers:
       '@simulaciencia/case-inverse-transform':
         specifier: workspace:*
         version: link:../../cases/inverse-transform
+      '@simulaciencia/case-poisson-counting':
+        specifier: workspace:*
+        version: link:../../cases/poisson-counting
       '@simulaciencia/case-radioactive-decay':
         specifier: workspace:*
         version: link:../../cases/radioactive-decay
@@ -146,6 +152,15 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schemas
 
+  cases/poisson-counting:
+    dependencies:
+      '@simulaciencia/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@simulaciencia/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+
   cases/radioactive-decay:
     dependencies:
       '@simulaciencia/core':
@@ -170,6 +185,9 @@ importers:
       '@simulaciencia/case-inverse-transform':
         specifier: workspace:*
         version: link:../../cases/inverse-transform
+      '@simulaciencia/case-poisson-counting':
+        specifier: workspace:*
+        version: link:../../cases/poisson-counting
       '@simulaciencia/case-radioactive-decay':
         specifier: workspace:*
         version: link:../../cases/radioactive-decay

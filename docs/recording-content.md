@@ -40,14 +40,16 @@ is entirely URL-driven:
 ?case=radioactive-decay&seed=987654&initialCount=300&rate=0.5&t=3&mode=social-v
 ```
 
-| Key             | Meaning                                                            |
-| --------------- | ------------------------------------------------------------------ |
-| `case`          | which case the URL pins (`inverse-transform`, `radioactive-decay`) |
-| `seed`          | 32-bit unsigned integer                                            |
-| `t`             | simulation time in seconds to fast-forward to, then stop           |
-| `mode`          | one of the four display modes                                      |
-| `theme`         | `dark` to force the dark surface                                   |
-| _anything else_ | a case parameter, validated against its schema                     |
+| Key             | Meaning                                                                                |
+| --------------- | -------------------------------------------------------------------------------------- |
+| `case`          | which case the URL pins (`inverse-transform`, `radioactive-decay`, `poisson-counting`) |
+| `seed`          | 32-bit unsigned integer                                                                |
+| `t`             | simulation time in seconds to fast-forward to, then stop                               |
+| `mode`          | one of the four display modes                                                          |
+| `theme`         | `dark` to force the dark surface                                                       |
+| `stage`         | Poisson case only: which `TeachingStage` to render                                     |
+| `fallback`      | Poisson case only: `1` forces the flat 2D detector                                     |
+| _anything else_ | a case parameter, validated against its schema                                         |
 
 Two loads of the same URL produce byte-identical output. That is asserted in
 `tests/e2e/gallery.spec.ts` ("a frozen URL config reproduces the identical
@@ -55,6 +57,40 @@ picture on reload").
 
 When `freezeAtTime` is set, the 3D chamber's idle camera orbit is switched off
 (`spinRate: 0`), so two screenshots of the same URL match pixel for pixel.
+
+### Freezing a teaching stage
+
+The Poisson laboratory adds one more axis: the stage. It changes what is drawn
+and nothing else, so the same `seed`, the same parameters and the same `t` give
+the same underlying run at every stage — which is exactly what makes a
+stage-by-stage capture sequence honest rather than seven separate simulations.
+
+For the counting case, `t` is read back as a window count: one case step reveals
+one observation window, so `t = revealedWindows × 0.25`.
+
+| Stage         | `t`    | Windows | What is on screen                           |
+| ------------- | ------ | ------- | ------------------------------------------- |
+| `scene`       | `0`    | 0       | detector only, no number anywhere           |
+| `manual`      | `0`    | 0       | + "Simular una ventana", count still hidden |
+| `counter`     | `0.25` | 1       | + K, window tally, count history            |
+| `automatic`   | `1.25` | 5       | + play / pause / step / reset and speed     |
+| `histogram`   | `10`   | 40      | + empirical discrete histogram              |
+| `theory`      | `10`   | 40      | + Poisson PMF overlay and μ = λΔt           |
+| `diagnostics` | `100`  | 400     | + mean, unbiased variance, Fano factor      |
+
+So a full seven-shot sequence for a video is seven URLs of this shape:
+
+```
+?case=poisson-counting&seed=20260801&rate=3&windowDuration=1&maxWindows=600&t=10&stage=theory&mode=social-v
+```
+
+Two notes for captures:
+
+- `histogram` and `theory` deliberately use the same `t`. Cutting between them
+  shows the model landing on observations the audience has already seen, not a
+  fresh run that happens to fit.
+- Add `&fallback=1` to capture the flat 2D detector — useful for a still where a
+  rotating camera would be a distraction, and the only way to show that path.
 
 In code, the same thing:
 
@@ -92,6 +128,21 @@ fixed-step timing and it is worth saying out loud in a video.
 Same, with `mode=social-v`. The vertical frame stacks the chamber above the
 survival curve and drops the CDF plot, because a 9:16 frame cannot carry two
 plots side by side and stay readable at phone size.
+
+### Capturing the Spanish class
+
+`pnpm slides` runs Clase 01 with hot reload; `pnpm build:slides` produces the
+static HTML that a screen recorder can drive without a dev server:
+
+```bash
+pnpm build:slides
+python -m http.server 8080 --directory apps/classroom/dist
+```
+
+Slide URLs are stable (`/2` is the `scene` stage, `/8` the `diagnostics` stage —
+see `apps/classroom/slides.md`), so a recording script can jump straight to a
+stage instead of clicking through. The original inverse-transform demonstration
+is still there under `pnpm slides:demo`.
 
 ### Presenting the lesson live
 

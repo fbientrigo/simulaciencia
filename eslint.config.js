@@ -8,6 +8,8 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      // Secondary build outputs: the demo deck and the Pages base build.
+      '**/dist-*/**',
       '**/node_modules/**',
       '**/.slidev/**',
       'playwright-report/**',

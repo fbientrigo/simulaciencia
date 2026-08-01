@@ -1,0 +1,68 @@
+name: Publish the classroom deck to GitHub Pages
+
+# The primary Spanish class is the public face of the project, so `main` is
+# published on every push. Playwright is deliberately absent: a browser-
+# infrastructure problem must never be able to take the class offline.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and a queued run supersedes an older one rather
+# than cancelling a deploy that is already mid-flight.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22.12.0'
+
+jobs:
+  build:
+    name: Build the Spanish class
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm is read from package.json's "packageManager" field, so bumping
+      # that field stays the only place a pnpm upgrade has to happen.
+      - name: Install the pinned pnpm version
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `--base /simulaciencia/` matches the project-pages URL. The default
+      # `pnpm build:slides` uses a relative base instead, which is what makes
+      # the CI artifact servable from any directory.
+      - name: Build the classroom deck for the repository base path
+        run: pnpm build:slides:pages
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/classroom/dist-pages
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

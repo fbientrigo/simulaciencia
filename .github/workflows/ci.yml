@@ -71,6 +71,19 @@ jobs:
           path: apps/classroom/dist
           retention-days: 1
 
+      # The reviewable classroom deliverable, uploaded from THIS job so a
+      # Playwright failure downstream can never stop a reviewer getting the
+      # class. Download it, unzip it, and serve the folder with any static
+      # server — see README, "Preview the class from CI".
+      - name: Upload the Spanish class as a servable static site
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: poisson-class-html
+          path: apps/classroom/dist
+          if-no-files-found: error
+          retention-days: 14
+
   e2e:
     name: Playwright smoke tests
     needs: quality

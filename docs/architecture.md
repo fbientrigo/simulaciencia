@@ -40,6 +40,32 @@ snapshot. There is no shared mutable object between layer boundaries.
 and fails on any `vue`, `three`, `document`, or `window` import. The engine must
 run unchanged in Node, in a worker, or in a future CLI.
 
+### `TeachingStage` belongs to the presentation layer
+
+A **teaching stage** says how much of a laboratory a class has earned the right
+to see at this point in a lesson: `scene`, `manual`, `counter`, `automatic`,
+`histogram`, `theory`, `diagnostics`. It lives in
+`packages/visuals/src/teaching/stages.ts` and it is a PRESENTATION concept, not
+a scientific one.
+
+The distinction is load-bearing, so it is enforced rather than described. A case
+that could ask "which stage am I in?" would be able to compute different numbers
+for different slides, and the project's central claim — that a seed plus a
+parameter set reproduces a run exactly — would quietly stop being true. So
+`packages/core`, `packages/schemas` and `cases/*` may not so much as name
+`TeachingStage`; `engine-purity.test.ts` fails if they do.
+
+What a stage may do: decide what is drawn. What it may never do: change what is
+computed. Given the same seed and parameters, `scene` and `diagnostics` hold the
+identical simulation — one of them just draws more of it.
+
+The stages are cumulative, and that is a property of the construction rather
+than a convention: each row of `STAGE_FEATURES` is literally built by spreading
+the previous one, and `teaching-stages.test.ts` asserts that no stage ever loses
+a feature the one before it had. Components read that one matrix instead of
+scattering `stage === 'histogram' || stage === 'theory' || …` through a
+template, which is how a stage silently loses a feature the lesson depends on.
+
 ## 3. Determinism model
 
 Three independent guarantees, each with its own test:
@@ -85,9 +111,19 @@ Neither knows the other exists. See `docs/adr/0002-model-snapshot-visual.md`.
 
 No backend, no database, no auth, no Docker, no Pyodide, no state-management
 framework, no charting library, no Three.js wrapper, no custom shaders, no
-plugin marketplace. Two concrete cases exist; abstractions were extracted only
-where both cases demonstrably needed them (`SimulationCase`, `RandomSource`,
-`SimulationRunner`, `histogram`/`ecdf`). Nothing was generalized on speculation.
+plugin marketplace, no internationalization framework. Three concrete cases
+exist; abstractions were extracted only where the cases demonstrably needed them
+(`SimulationCase`, `RandomSource`, `SimulationRunner`, `histogram`/`ecdf`).
+Nothing was generalized on speculation.
+
+The counting detector is the clearest recent example. Adding a second 3D scene
+pulled exactly two things out of `decayScene.ts` — the WebGL 2 capability probe
+and the disposal registry — because both were identical and both are testable
+without a GPU. Cameras, lights, entities, detector geometry and scene graphs
+were **not** generalized: the two scenes genuinely want different ones, and a
+"generic Three.js framework" would have cost more than the duplication it
+removed. Likewise, the Poisson PMF lives in `cases/poisson-counting`, not in
+`packages/core`, until a second case needs the same recurrence.
 
 ## 7. Future Python reference package
 
