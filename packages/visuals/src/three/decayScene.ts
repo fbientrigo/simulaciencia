@@ -25,6 +25,14 @@ export interface DecayScene {
   dispose(): void;
   /** True once `dispose()` has run. */
   readonly disposed: boolean;
+  /** Current idle-orbit speed, radians/second. 0 means the camera is frozen. */
+  readonly spinRate: number;
+  /**
+   * Change the idle-orbit speed at runtime, e.g. to honour a live
+   * `prefers-reduced-motion` change. Purely cosmetic — it never touches
+   * simulation state, only how the camera moves between snapshots.
+   */
+  setSpinRate(rate: number): void;
 }
 
 /**
@@ -86,7 +94,11 @@ export function supportsWebGL2(): boolean {
 
 export function createDecayScene(options: DecaySceneOptions): DecayScene {
   const { canvas, width, height } = options;
-  const spinRate = options.spinRate ?? 0.12;
+  // Mutable so `setSpinRate` can change it after construction — the idle
+  // orbit is the one piece of this scene that a caller may need to turn off
+  // mid-session (a live `prefers-reduced-motion` change), without tearing
+  // down and reallocating every GPU resource just to do it.
+  let spinRate = options.spinRate ?? 0.12;
   const factory = options.rendererFactory ?? defaultRendererFactory;
 
   // One list, one dispose loop. Anything added to the scene that owns GPU
@@ -224,13 +236,22 @@ export function createDecayScene(options: DecaySceneOptions): DecayScene {
     highlightUntil = new Float64Array(0);
   }
 
+  function setSpinRate(rate: number): void {
+    if (disposed) return;
+    spinRate = rate;
+  }
+
   return {
     update,
     render,
     resize,
     dispose,
+    setSpinRate,
     get disposed(): boolean {
       return disposed;
+    },
+    get spinRate(): number {
+      return spinRate;
     },
   };
 }

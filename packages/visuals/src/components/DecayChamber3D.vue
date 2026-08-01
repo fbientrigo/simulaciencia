@@ -89,15 +89,41 @@ const dense = computed(() => props.mode === 'slide' || props.mode === 'social-v'
 
 /* ---- Renderer lifecycle -------------------------------------------------- */
 
+const IDLE_SPIN_RATE = 0.12;
+
 const shell = ref<HTMLDivElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
 /** null until mount decides; true means "3D is running". */
 const webglReady = ref<boolean | null>(null);
 
+/**
+ * Tracks the OS-level `prefers-reduced-motion` setting. Starts `false`
+ * (full motion) so environments without `matchMedia` — SSR, some test
+ * harnesses — get today's default behaviour rather than a frozen camera.
+ */
+const prefersReducedMotion = ref(false);
+
+/**
+ * The idle camera orbit is the only thing this preference is allowed to
+ * touch: it is cosmetic, drives no statistic, and turning it off changes
+ * nothing about what the simulation computes. A frozen capture already
+ * wants a still camera for its own reason (pixel-identical screenshots),
+ * so the two conditions share one derived rate rather than fighting over
+ * the scene's spin setting.
+ */
+const idleSpinRate = computed(() =>
+  props.freezeAtTime !== undefined || prefersReducedMotion.value ? 0 : IDLE_SPIN_RATE,
+);
+
 let scene: DecayScene | null = null;
 let frameHandle: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let motionQuery: MediaQueryList | null = null;
 let lastFrameTime = 0;
+
+function handleMotionPreferenceChange(event: MediaQueryListEvent): void {
+  prefersReducedMotion.value = event.matches;
+}
 
 function renderFrame(timestamp: number): void {
   if (scene === null) return;
@@ -117,6 +143,10 @@ function teardown(): void {
     resizeObserver.disconnect();
     resizeObserver = null;
   }
+  if (motionQuery !== null) {
+    motionQuery.removeEventListener('change', handleMotionPreferenceChange);
+    motionQuery = null;
+  }
   if (scene !== null) {
     scene.dispose();
     scene = null;
@@ -125,6 +155,15 @@ function teardown(): void {
 }
 
 onMounted(() => {
+  // Read the live preference before the scene exists, so the very first
+  // frame already respects it rather than spinning for one tick and then
+  // snapping still.
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    prefersReducedMotion.value = motionQuery.matches;
+    motionQuery.addEventListener('change', handleMotionPreferenceChange);
+  }
+
   if (props.forceFallback || !supportsWebGL2()) {
     webglReady.value = false;
     return;
@@ -148,8 +187,7 @@ onMounted(() => {
       width,
       height,
       pixelRatio: Math.min(globalThis.devicePixelRatio ?? 1, 2),
-      // A frozen capture must not drift between two screenshots.
-      spinRate: props.freezeAtTime !== undefined ? 0 : 0.12,
+      spinRate: idleSpinRate.value,
     });
   } catch {
     // A context that reports webgl2 but fails to initialise is still a
@@ -175,6 +213,13 @@ onMounted(() => {
 });
 
 onBeforeUnmount(teardown);
+
+// A live OS-level toggle (or, in principle, `freezeAtTime` changing) updates
+// an already-running scene without rebuilding it — rotation is the only
+// thing this ever touches.
+watch(idleSpinRate, (rate) => {
+  scene?.setSpinRate(rate);
+});
 
 // Push each new snapshot into the scene. Vue's watcher, not a timer.
 watch(snapshot, (next) => {

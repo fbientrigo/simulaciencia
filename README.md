@@ -1,5 +1,7 @@
 # SimulaCiencia
 
+[![CI](https://github.com/fbientrigo/simulaciencia/actions/workflows/ci.yml/badge.svg)](https://github.com/fbientrigo/simulaciencia/actions/workflows/ci.yml)
+
 **Modelar · Simular · Comprender**
 
 A reusable simulation engine and interactive web laboratory for teaching
@@ -66,10 +68,35 @@ no build step between them.
 | `pnpm format`     | Prettier                                                                  |
 | `pnpm build`      | Static production builds of the gallery and the deck                      |
 | `pnpm verify`     | lint → typecheck → test → build, in that order                            |
+| `pnpm verify:all` | The complete local merge gate: `pnpm verify`, then `pnpm test:e2e`        |
 
 Presenting: `pnpm slides`, then `o` for overview, `p` for presenter mode with
 speaker notes, `f` for full screen. `pnpm build:slides` produces static HTML in
 `apps/classroom/dist` that works from any host or a USB stick.
+
+### Local merge gate
+
+Before opening a pull request, run the same checks CI runs:
+
+```bash
+pnpm verify:all
+```
+
+This is `pnpm verify` (lint, typecheck, unit tests, both production builds)
+followed by `pnpm test:e2e` against those exact builds — `test:e2e` reuses the
+`dist/` output `verify` just produced, so nothing is built twice.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`,
+using the same pnpm version pinned in `packageManager` (activated through
+Corepack, never hardcoded in the workflow) and Node 22.12. Two jobs:
+
+- **quality** — lint, typecheck, unit tests, both production builds.
+- **e2e** — depends on `quality`, downloads its build output, installs
+  Playwright's own Chromium (not the local sandbox fallback described below),
+  and runs the browser smoke tests. Traces and failure screenshots are
+  uploaded only when the job fails.
 
 ---
 
@@ -114,6 +141,7 @@ and the cases may not import Vue, Three.js, Slidev or the DOM — enforced by
 | Results are independent of frame subdivision                      | `frame-independence.test.ts`                                  |
 | The engine never touches Vue, Three.js or the DOM                 | `engine-purity.test.ts`                                       |
 | Three.js resources are disposed on unmount                        | `three-disposal.test.ts`, `components.test.ts`                |
+| The idle camera orbit honours `prefers-reduced-motion`            | `reduced-motion.test.ts`                                      |
 | Type checking passes                                              | `pnpm typecheck`                                              |
 | The Slidev static build succeeds and boots                        | `pnpm build:slides`, `tests/e2e/classroom.spec.ts`            |
 | The gallery loads both visualizations                             | `tests/e2e/gallery.spec.ts`                                   |
@@ -186,8 +214,6 @@ Two compatibility decisions worth remembering:
 - **Statistical tolerances are seed-specific.** They are deliberately fixed facts
   about specific seeded runs, not probabilistic claims — which is what keeps them
   from flaking, but also means changing a seed in a test requires re-measuring.
-- **No `prefers-reduced-motion` opt-out for the 3D camera orbit.** The CSS
-  transitions respect it; the idle orbit does not yet.
 
 ---
 

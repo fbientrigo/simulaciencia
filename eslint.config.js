@@ -43,6 +43,8 @@ export default tseslint.config(
         HTMLInputElement: 'readonly',
         HTMLCanvasElement: 'readonly',
         RenderingContext: 'readonly',
+        MediaQueryList: 'readonly',
+        MediaQueryListEvent: 'readonly',
         process: 'readonly',
       },
     },
