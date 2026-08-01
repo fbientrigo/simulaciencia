@@ -9,11 +9,12 @@ import { defineConfig, devices } from '@playwright/test';
  * Both servers serve real production builds, not dev servers, so a build-only
  * regression (a bad `base`, a broken `optimizeDeps.exclude`) is caught here.
  */
+const LOOPBACK_HOST = '127.0.0.1';
 const GALLERY_PORT = 4321;
 const CLASSROOM_PORT = 4322;
 
-export const GALLERY_URL = `http://127.0.0.1:${GALLERY_PORT}`;
-export const CLASSROOM_URL = `http://127.0.0.1:${CLASSROOM_PORT}`;
+export const GALLERY_URL = `http://${LOOPBACK_HOST}:${GALLERY_PORT}`;
+export const CLASSROOM_URL = `http://${LOOPBACK_HOST}:${CLASSROOM_PORT}`;
 
 /**
  * Some sandboxes ship a pre-installed Chromium that does not match the build
@@ -58,16 +59,22 @@ export default defineConfig({
 
   webServer: [
     {
-      command: `pnpm --filter @simulaciencia/gallery exec vite preview --port ${GALLERY_PORT} --strictPort`,
+      name: 'gallery preview',
+      command: `pnpm --filter @simulaciencia/gallery exec vite preview --host ${LOOPBACK_HOST} --port ${GALLERY_PORT} --strictPort`,
       url: GALLERY_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
     },
     {
-      command: `pnpm --filter @simulaciencia/classroom exec vite preview --outDir dist --port ${CLASSROOM_PORT} --strictPort`,
+      name: 'classroom preview',
+      command: `pnpm --filter @simulaciencia/classroom exec vite preview --host ${LOOPBACK_HOST} --outDir dist --port ${CLASSROOM_PORT} --strictPort`,
       url: CLASSROOM_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
     },
   ],
 });
