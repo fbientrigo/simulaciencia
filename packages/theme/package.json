@@ -1,0 +1,20 @@
+{
+  "name": "@simulaciencia/theme",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SimulaCiencia design tokens, slide layouts and panel styles as plain CSS custom properties.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./base.css": "./src/base.css",
+    "./panels.css": "./src/panels.css",
+    "./layouts.css": "./src/layouts.css",
+    "./charts.css": "./src/charts.css",
+    "./all.css": "./src/all.css"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

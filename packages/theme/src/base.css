@@ -1,0 +1,198 @@
+/* Base typography and form controls. Scoped to `.sc-root` so the theme can be
+ * dropped into a Slidev deck without fighting the deck's own reset. */
+
+.sc-root {
+  font-family: var(--sc-font-sans);
+  font-size: var(--sc-text-base);
+  line-height: var(--sc-leading-normal);
+  color: var(--sc-text);
+  background: var(--sc-surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sc-root *,
+.sc-root *::before,
+.sc-root *::after {
+  box-sizing: border-box;
+}
+
+.sc-title {
+  font-size: var(--sc-text-2xl);
+  line-height: var(--sc-leading-tight);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.sc-subtitle {
+  font-size: var(--sc-text-lg);
+  color: var(--sc-text-muted);
+  font-weight: 400;
+  margin: 0;
+}
+
+.sc-caption {
+  font-size: var(--sc-text-sm);
+  color: var(--sc-text-muted);
+  line-height: var(--sc-leading-normal);
+  margin: 0;
+}
+
+.sc-hint {
+  font-size: var(--sc-text-xs);
+  color: var(--sc-text-muted);
+}
+
+/* Any number the student is meant to compare with another number. */
+.sc-numeric {
+  font-family: var(--sc-font-numeric);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ---- Controls ------------------------------------------------------------ */
+
+.sc-control {
+  display: grid;
+  gap: var(--sc-space-1);
+  min-width: 0;
+}
+
+.sc-control__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sc-space-2);
+}
+
+.sc-control__label {
+  font-size: var(--sc-text-sm);
+  font-weight: 600;
+}
+
+.sc-control__value {
+  font-family: var(--sc-font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--sc-text-sm);
+  color: var(--sc-text-muted);
+}
+
+.sc-control__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sc-space-2);
+}
+
+.sc-control input[type='range'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  accent-color: var(--sc-theoretical-strong);
+  cursor: pointer;
+}
+
+.sc-control input[type='number'],
+.sc-control input[type='text'] {
+  width: 8ch;
+  flex: 0 0 auto;
+  font-family: var(--sc-font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--sc-text-sm);
+  padding: var(--sc-space-1) var(--sc-space-2);
+  color: var(--sc-text);
+  background: var(--sc-surface-raised);
+  border: var(--sc-stroke-thin) solid var(--sc-border);
+  border-radius: var(--sc-radius-sm);
+}
+
+.sc-control input:focus-visible,
+.sc-button:focus-visible {
+  outline: 2px solid var(--sc-theoretical-strong);
+  outline-offset: 2px;
+}
+
+.sc-button {
+  font: inherit;
+  font-size: var(--sc-text-sm);
+  font-weight: 600;
+  padding: var(--sc-space-2) var(--sc-space-3);
+  color: var(--sc-text);
+  background: var(--sc-surface-raised);
+  border: var(--sc-stroke-thin) solid var(--sc-border-strong);
+  border-radius: var(--sc-radius-sm);
+  cursor: pointer;
+  transition: background var(--sc-duration-fast) var(--sc-ease);
+}
+
+.sc-button:hover:not(:disabled) {
+  background: var(--sc-surface-sunken);
+}
+
+.sc-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sc-button--primary {
+  color: #fff;
+  background: var(--sc-theoretical-strong);
+  border-color: var(--sc-theoretical-strong);
+}
+
+.sc-button--primary:hover:not(:disabled) {
+  background: var(--sc-theoretical-text);
+}
+
+.sc-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-space-2);
+}
+
+/* ---- Legend -------------------------------------------------------------- */
+
+.sc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-space-3);
+  font-size: var(--sc-chart-label-size);
+  color: var(--sc-text-muted);
+}
+
+.sc-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sc-space-1);
+  white-space: nowrap;
+}
+
+.sc-legend__swatch {
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.sc-legend__swatch--theoretical {
+  background: var(--sc-theoretical);
+}
+
+.sc-legend__swatch--simulated {
+  background: var(--sc-simulated);
+  outline: 1px solid var(--sc-simulated-strong);
+  outline-offset: -1px;
+}
+
+.sc-legend__swatch--uncertainty {
+  background: var(--sc-uncertainty);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-root *,
+  .sc-root *::before,
+  .sc-root *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

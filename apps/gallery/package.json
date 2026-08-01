@@ -1,0 +1,27 @@
+{
+  "name": "@simulaciencia/gallery",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone laboratory: both cases, all four display modes, URL-serializable configuration.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@simulaciencia/case-inverse-transform": "workspace:*",
+    "@simulaciencia/case-radioactive-decay": "workspace:*",
+    "@simulaciencia/core": "workspace:*",
+    "@simulaciencia/schemas": "workspace:*",
+    "@simulaciencia/theme": "workspace:*",
+    "@simulaciencia/visuals": "workspace:*",
+    "vue": "3.5.40"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.8",
+    "vite": "8.2.0",
+    "vue-tsc": "3.3.9"
+  }
+}

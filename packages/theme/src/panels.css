@@ -1,0 +1,197 @@
+/*
+ * Pedagogical panels.
+ *
+ * Five kinds, each mapped to a semantic role so the colour carries meaning
+ * rather than decoration:
+ *   equation   — a statement of the model            (theoretical)
+ *   definition — vocabulary being introduced         (neutral)
+ *   exercise   — something the student must do       (uncertainty)
+ *   warning    — a trap, an assumption, a limit      (simulated)
+ *   result     — a validated conclusion              (success)
+ */
+
+.sc-panel {
+  --sc-panel-accent: var(--sc-border-strong);
+  --sc-panel-tint: var(--sc-surface-sunken);
+  --sc-panel-label-color: var(--sc-text-muted);
+
+  display: grid;
+  gap: var(--sc-space-2);
+  padding: var(--sc-space-3) var(--sc-space-4);
+  background: var(--sc-panel-tint);
+  border-left: 3px solid var(--sc-panel-accent);
+  border-radius: var(--sc-radius-sm);
+  color: var(--sc-text);
+}
+
+.sc-panel__label {
+  font-size: var(--sc-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sc-panel-label-color);
+}
+
+.sc-panel__body {
+  font-size: var(--sc-text-base);
+  line-height: var(--sc-leading-normal);
+}
+
+.sc-panel__body > :first-child {
+  margin-top: 0;
+}
+
+.sc-panel__body > :last-child {
+  margin-bottom: 0;
+}
+
+.sc-panel--equation {
+  --sc-panel-accent: var(--sc-theoretical);
+  --sc-panel-tint: var(--sc-theoretical-soft);
+  --sc-panel-label-color: var(--sc-theoretical-text);
+
+  text-align: center;
+}
+
+.sc-panel--definition {
+  --sc-panel-accent: var(--sc-border-strong);
+  --sc-panel-tint: var(--sc-surface-sunken);
+}
+
+.sc-panel--exercise {
+  --sc-panel-accent: var(--sc-uncertainty);
+  --sc-panel-tint: var(--sc-uncertainty-soft);
+  --sc-panel-label-color: var(--sc-uncertainty-text);
+}
+
+.sc-panel--warning {
+  --sc-panel-accent: var(--sc-simulated);
+  --sc-panel-tint: var(--sc-simulated-soft);
+  --sc-panel-label-color: var(--sc-simulated-text);
+}
+
+.sc-panel--result {
+  --sc-panel-accent: var(--sc-success);
+  --sc-panel-tint: var(--sc-success-soft);
+  --sc-panel-label-color: var(--sc-success-text);
+}
+
+/* ---- Statistics table ---------------------------------------------------- */
+
+.sc-stats {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sc-text-sm);
+}
+
+.sc-stats th,
+.sc-stats td {
+  padding: var(--sc-space-1) var(--sc-space-2);
+  text-align: right;
+  border-bottom: var(--sc-stroke-thin) solid var(--sc-border);
+}
+
+.sc-stats th:first-child,
+.sc-stats td:first-child {
+  text-align: left;
+}
+
+.sc-stats thead th {
+  font-size: var(--sc-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+.sc-stats tbody td:not(:first-child) {
+  font-family: var(--sc-font-numeric);
+  font-variant-numeric: tabular-nums;
+}
+
+.sc-stats__theoretical {
+  color: var(--sc-theoretical-text);
+}
+
+.sc-stats__simulated {
+  color: var(--sc-simulated-text);
+}
+
+/* ---- Pass / fail checks -------------------------------------------------- */
+
+.sc-checks {
+  display: grid;
+  gap: var(--sc-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sc-check {
+  display: grid;
+  grid-template-columns: 1.25em 1fr;
+  gap: var(--sc-space-2);
+  align-items: baseline;
+  font-size: var(--sc-text-sm);
+}
+
+.sc-check__mark {
+  font-weight: 700;
+  text-align: center;
+}
+
+.sc-check--pass .sc-check__mark {
+  color: var(--sc-success-text);
+}
+
+.sc-check--fail .sc-check__mark {
+  color: var(--sc-error-text);
+}
+
+.sc-check__detail {
+  display: block;
+  font-family: var(--sc-font-numeric);
+  font-size: var(--sc-text-xs);
+  color: var(--sc-text-muted);
+}
+
+/* ---- Metric badges ------------------------------------------------------- */
+
+.sc-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sc-space-3);
+}
+
+.sc-metric {
+  display: grid;
+  gap: 2px;
+  min-width: 5.5rem;
+}
+
+.sc-metric__label {
+  font-size: var(--sc-text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sc-text-muted);
+}
+
+.sc-metric__value {
+  font-family: var(--sc-font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--sc-text-lg);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.sc-metric--theoretical .sc-metric__value {
+  color: var(--sc-theoretical-text);
+}
+
+.sc-metric--simulated .sc-metric__value {
+  color: var(--sc-simulated-text);
+}
+
+.sc-metric--uncertainty .sc-metric__value {
+  color: var(--sc-uncertainty-text);
+}
