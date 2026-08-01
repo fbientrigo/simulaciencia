@@ -76,6 +76,16 @@ const props = withDefaults(
   },
 );
 
+interface PoissonCountingLabState {
+  readonly seed: number;
+  readonly params: PoissonCountingParams;
+  readonly revealedWindows: number;
+}
+
+const emit = defineEmits<{
+  'state-change': [state: PoissonCountingLabState];
+}>();
+
 const features = computed(() => stageFeatures(props.stage));
 
 const seedSpec: SeedFieldSpec = {
@@ -135,6 +145,19 @@ function restart(): void {
 
 watch(params, () => restart(), { deep: true });
 watch(seedValue, () => restart());
+
+function emitState(): void {
+  emit('state-change', {
+    seed: seedValue.value,
+    params: { ...params.value },
+    revealedWindows: snapshot.value.revealedWindows,
+  });
+}
+
+watch([params, seedValue, () => snapshot.value.revealedWindows], emitState, {
+  deep: true,
+  immediate: true,
+});
 
 const SPEEDS = [0.5, 1, 2, 4] as const;
 
