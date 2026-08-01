@@ -2,13 +2,22 @@ import { expect, test } from '@playwright/test';
 import { CLASSROOM_URL } from '../../playwright.config.ts';
 
 /**
+ * Slidev requests a screen wake lock when the deck boots. Chromium headless
+ * denies that permission and surfaces it as a page error even though the deck
+ * remains fully functional. Keep the smoke test strict for every other error.
+ */
+const BENIGN_PAGE_ERRORS = new Set(['Wake Lock permission request denied']);
+
+/**
  * The Slidev deck must not just build — it must boot as static HTML and mount
  * the same interactive components the gallery uses.
  */
 test.describe('classroom deck', () => {
   test('serves the title slide from the static build', async ({ page }) => {
     const failures: string[] = [];
-    page.on('pageerror', (error) => failures.push(error.message));
+    page.on('pageerror', (error) => {
+      if (!BENIGN_PAGE_ERRORS.has(error.message)) failures.push(error.message);
+    });
 
     await page.goto(`${CLASSROOM_URL}/`);
     await expect(page.locator('body')).toContainText('SimulaCiencia');
